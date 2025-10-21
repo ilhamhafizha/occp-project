@@ -2,9 +2,9 @@ import asyncio
 import logging
 import websockets
 from datetime import datetime, timezone
-
 from ocpp.v16 import ChargePoint as BaseChargePoint
-from ocpp.v16 import call
+from ocpp.v16 import call, call_result
+from ocpp.routing import on
 from ocpp.v16.enums import RegistrationStatus
 
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +33,17 @@ class ChargePoint(BaseChargePoint):
             req = call.Heartbeat()
             resp = await self.call(req)
             logging.info(f"Heartbeat.conf: {resp}")
+
+    @on("Authorize")
+    async def on_authorize(self, id_tag):
+        logging.info(f"🔑 Authorize.req received | idTag={id_tag}")
+        return call_result.Authorize(
+            id_tag_info={
+                "status": "Accepted",
+                "expiryDate": datetime.now(timezone.utc).isoformat(),
+                "parentIdTag": None
+            }
+        )
 
 
 async def main():
