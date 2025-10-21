@@ -75,7 +75,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761013228976</updated>
-      <workItem from="1761013229978" duration="4719000" />
+      <workItem from="1761013229978" duration="6624000" />
     </task>
     <servers />
   </component>
@@ -92,8 +92,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/csms/csms.py</url>
-          <line>120</line>
-          <option name="timeStamp" value="3" />
+          <line>79</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -45,6 +45,28 @@ class ChargePoint(BaseChargePoint):
             }
         )
 
+    @on("RemoteStartTransaction")
+    async def on_remote_start_transaction(self, id_tag, **kwargs):
+        logging.info(f"⚡ RemoteStartTransaction diterima | idTag={id_tag}")
+
+        # Kirim balasan ke CSMS bahwa CP menerima perintah ini
+        response = call_result.RemoteStartTransaction(status="Accepted")
+        asyncio.create_task(self.start_transaction(id_tag))
+        return response
+
+    async def start_transaction(self, id_tag):
+        """Simulasi pengiriman StartTransaction.req ke CSMS"""
+        await asyncio.sleep(2)  # simulasi delay
+        req = call.StartTransaction(
+            connector_id=1,
+            id_tag=id_tag,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            meter_start=0,
+            reservation_id=0
+        )
+        logging.info(f"🔋 Mengirim StartTransaction.req untuk idTag={id_tag}")
+        resp = await self.call(req)
+        logging.info(f"StartTransaction.conf: {resp}")
 
 async def main():
     cp_id = "CP_1"
