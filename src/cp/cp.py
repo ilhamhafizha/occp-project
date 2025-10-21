@@ -1,0 +1,51 @@
+import asyncio
+import logging
+import websockets
+from datetime import datetime, timezone
+
+from ocpp.v16 import ChargePoint as BaseChargePoint
+from ocpp.v16 import call
+from ocpp.v16.enums import RegistrationStatus
+
+logging.basicConfig(level=logging.INFO)
+
+
+class ChargePoint(BaseChargePoint):
+    async def send_boot_notification(self):
+        req = call.BootNotification(
+            charge_point_model="DemoModel",
+            charge_point_vendor="DemoVendor"
+        )
+        logging.info("BootNotification sent")
+        resp = await self.call(req)
+        logging.info(f"BootNotification.conf: {resp}")
+
+        if getattr(resp, "status", None) == RegistrationStatus.accepted:
+            interval = getattr(resp, "interval", 10)
+            logging.info(f"Boot accepted ✅ | heartbeat interval={interval}s")
+            asyncio.create_task(self.heartbeat_loop(interval))
+        else:
+            logging.warning("Boot rejected ❌")
+
+    async def heartbeat_loop(self, interval):
+        while True:
+            await asyncio.sleep(interval)
+            req = call.Heartbeat()
+            resp = await self.call(req)
+            logging.info(f"Heartbeat.conf: {resp}")
+
+
+async def main():
+    cp_id = "CP_1"
+    uri = f"ws://127.0.0.1:9000/{cp_id}"
+
+    logging.info(f"Connecting to {uri} ...")
+    async with websockets.connect(uri, subprotocols=["ocpp1.6"]) as ws:
+        cp = ChargePoint(cp_id, ws)
+        asyncio.create_task(cp.start())
+        await cp.send_boot_notification()
+        await asyncio.Future()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

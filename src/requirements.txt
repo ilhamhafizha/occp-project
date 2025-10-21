@@ -1,0 +1,3 @@
+websockets>=10.4
+ocpp>=0.23.0
+aiohttp>=3.8.4
